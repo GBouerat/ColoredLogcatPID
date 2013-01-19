@@ -4,7 +4,7 @@ Colored Logcat PID is a fork of [Jeff Sharkey Colored Logcat](http://jsharkey.or
 
 Colored Logcat PID adding filter by Android name package.
 
-Last version : 1.2 (feb 21, 2012)
+Last version : 1.3 (jan 19, 2013)
 
 ## How to use it :
 make it executable :
