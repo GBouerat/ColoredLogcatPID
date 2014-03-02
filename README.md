@@ -4,7 +4,7 @@ Colored Logcat PID is a fork of [Jeff Sharkey Colored Logcat](http://jsharkey.or
 
 Colored Logcat PID adding filter by Android name package.
 
-Last version : 1.3 (jan 19, 2013)
+Last version : 1.4 (mar 2, 2014)
 
 ## How to use it :
 make it executable :
@@ -20,10 +20,13 @@ or
 
 ## Options :
 
-    -e  or  --exclude  : Exclude tag from logcat (you can exclude several tags)
-    -p  or  --package  : Filter by Android package name
-    -h  or  --help     : Print Help (this message) and exit
-    -v  or  --version  : Print version and exit
+    -d  or  --device    : see adb -d
+    -e  or  --emulator  : see adb -e
+    -s  or  --serial    : see adb -s
+    -x  or  --exclude   : Exclude tag from logcat (you can exclude several tags)
+    -p  or  --package   : Filter by Android package name
+    -h  or  --help      : Print Help (this message) and exit
+    -v  or  --version   : Print version and exit
 
 ## Screenshot :
 
@@ -31,6 +34,7 @@ or
 
 ## Change Log :
 
+  - v1.4 : Rename short option e to x (--exclude). Add adb options -d -e -s
   - v1.3 : Fix bug with bluetooth log and show log from other pid containing package name
   - v1.2 : Add tag exclusion
   - v1.1 : Fix bug on linux

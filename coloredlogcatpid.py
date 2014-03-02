@@ -19,7 +19,7 @@
 # script to highlight adb logcat output for console
 # written by jeff sharkey, http://jsharkey.org/
 # piping detection and popen() added by other android team members
-# filter by Android package name added by Guillaume BOUERAT
+# filter by Android package name added by Guillaume BOUERAT, https://github.com/GBouerat
 
 import os, sys, getopt, re
 import fcntl, termios, struct
@@ -81,27 +81,30 @@ def allocate_color(tag):
     LAST_USED.append(color)
     return color
 
-VERSION = "1.3"
+VERSION = "1.4"
 
 def version():
     print("Colored Logcat PID version " + VERSION)
-    print("https://bitbucket.org/GBouerat/colored-logcat-pid")
+    print("https://github.com/GBouerat/ColoredLogcatPID")
 
 def usage():
     version()
     print
     print("Usage : coloredlogcatpid.py -p com.example.name")
-    print("   or : coloredlogcatpid.py -e tagname")
-    print("   or : coloredlogcatpid.py -e tagname1 -e tagname2 ...")
+    print("   or : coloredlogcatpid.py -x tagname")
+    print("   or : coloredlogcatpid.py -x tagname1 -x tagname2 ...")
     print("   or : adb logcat | coloredlogcatpid.py -p com.example.name")
-    print("   or : adb logcat | coloredlogcatpid.py -p com.example.name -e tagname1")
-    print("   or : adb logcat | coloredlogcatpid.py -p com.example.name -e tagname1 -e tagname2 ...")
+    print("   or : adb logcat | coloredlogcatpid.py -p com.example.name -x tagname1")
+    print("   or : adb logcat | coloredlogcatpid.py -p com.example.name -x tagname1 -x tagname2 ...")
     print
     print("Arguments :")
-    print("  -e  or  --exclude  : Exclude tag from logcat (you can exclude several tags)")
-    print("  -p  or  --package  : Filter by Android package name")
-    print("  -h  or  --help     : Print Help (this message) and exit")
-    print("  -v  or  --version  : Print version and exit")
+    print("  -d  or  --device    : see adb -d")
+    print("  -e  or  --emulator  : see adb -e")
+    print("  -s  or  --serial    : see adb -s")
+    print("  -x  or  --exclude   : Exclude tag from logcat (you can exclude several tags)")
+    print("  -p  or  --package   : Filter by Android package name")
+    print("  -h  or  --help      : Print Help (this message) and exit")
+    print("  -v  or  --version   : Print version and exit")
 
 RULES = {
     #re.compile(r"([\w\.@]+)=([\w\.@]+)"): r"%s\1%s=%s\2%s" % (format(fg=BLUE), format(fg=GREEN), format(fg=BLUE), format(reset=True)),
@@ -123,10 +126,11 @@ TAGTYPES = {
 pid = "-1"
 package = None
 exclude = None
+adb_args = None
 
 argv = sys.argv[1:]
 try:
-    opts, args = getopt.getopt(argv, "hvp:e:", ["help", "version", "package=", "exclude="])
+    opts, args = getopt.getopt(argv, "hvp:x:s:de", ["help", "version", "package=", "exclude=", "serial=", "device", "emulator"])
 except (getopt.GetoptError, err):
     print(str(err))
     print
@@ -144,7 +148,16 @@ for opt, arg in opts:
             usage()
             sys.exit()
         package = arg
-    elif opt in ("-e", "--exclude"):
+    elif opt in ("-s", "--serial"):
+        if arg is None:
+            usage()
+            sys.exit()
+        adb_args = '-s ' + arg
+    elif opt in ("-d", "--device"):
+        adb_args = '-d'
+    elif opt in ("-e", "--emulator"):
+        adb_args = '-e'
+    elif opt in ("-x", "--exclude"):
         if not arg is None:
             if exclude is None:
                 exclude = [arg]
@@ -153,18 +166,17 @@ for opt, arg in opts:
 
 # if someone is piping in to us, use stdin as input.  if not, invoke adb logcat
 if os.isatty(sys.stdin.fileno()):
-    # to pick up -d or -e
-    # adb_args = ' '.join(sys.argv[1:])
-    # input = os.popen("adb %s logcat" % adb_args)
-    input = os.popen("adb logcat")
+    if adb_args is None:
+        input = os.popen("adb logcat")
+    else:
+        input = os.popen("adb %s logcat" % adb_args)
 else:
     input = sys.stdin
 
 if not package is None:
     repid = re.compile("^Start proc " + package + " for .*pid=([0-9]+).*$")
 
-retag = re.compile("^([A-Z])/([^\(]+)\(([^\)]+)\): (.*)$")
-retag2 = re.compile("^([A-Z])/([^\(]+)\(.+\)\(([^\)]+)\): (.*)$")
+retag = re.compile("^([A-Z])/(.*)\(([ 0-9]{5})\): (.*)$")
 
 while True:
     try:
@@ -173,8 +185,6 @@ while True:
         break
 
     match = retag.match(line)
-    if match is None:
-        match = retag2.match(line)
 
     if not match is None:
         tagtype, tag, owner, message = match.groups()
