@@ -30,7 +30,7 @@ or
 
 ## Screenshot :
 
-![coloredlogcatpid.py](https://bitbucket.org/GBouerat/colored-logcat-pid/raw/ca882f7a8af2/Colored%20Logcat%20PID.png)
+![coloredlogcatpid.py](https://raw.github.com/GBouerat/ColoredLogcatPID/master/Colored%20Logcat%20PID.png)
 
 ## Change Log :
 
